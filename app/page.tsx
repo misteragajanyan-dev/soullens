@@ -6,6 +6,52 @@ import { useRouter } from "next/navigation";
 
 type Mode = "zodiac" | "screenshots";
 
+async function compressImage(file: File, maxWidth = 1280, quality = 0.72): Promise<File> {
+  if (!file.type.startsWith("image/")) {
+    return file;
+  }
+
+  const imageBitmap = await createImageBitmap(file);
+
+  let targetWidth = imageBitmap.width;
+  let targetHeight = imageBitmap.height;
+
+  if (targetWidth > maxWidth) {
+    const ratio = maxWidth / targetWidth;
+    targetWidth = Math.round(targetWidth * ratio);
+    targetHeight = Math.round(targetHeight * ratio);
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return file;
+  }
+
+  ctx.drawImage(imageBitmap, 0, 0, targetWidth, targetHeight);
+
+  const blob: Blob = await new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (result) => {
+        if (result) resolve(result);
+        else reject(new Error("Не удалось сжать изображение"));
+      },
+      "image/jpeg",
+      quality
+    );
+  });
+
+  const safeName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+
+  return new File([blob], safeName, {
+    type: "image/jpeg",
+    lastModified: Date.now(),
+  });
+}
+
 export default function HomePage() {
   const router = useRouter();
 
@@ -381,7 +427,20 @@ export default function HomePage() {
                     <Field label="Имя партнёра">
                       <input
                         value={user2Name}
-                        onChange={(e) => setUser2Name(e.target.value)}
+                        onChange={async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) {
+    setUser1Image(null);
+    return;
+  }
+
+  try {
+    const compressed = await compressImage(file);
+    setUser1Image(compressed);
+  } catch {
+    setUser1Image(file);
+  }
+}}
                         placeholder="Необязательно, но желательно"
                         style={inputStyle}
                       />
@@ -391,7 +450,20 @@ export default function HomePage() {
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => setUser1Image(e.target.files?.[0] || null)}
+                        onChange={async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) {
+    setUser2Image(null);
+    return;
+  }
+
+  try {
+    const compressed = await compressImage(file);
+    setUser2Image(compressed);
+  } catch {
+    setUser2Image(file);
+  }
+}}
                         style={inputStyle}
                       />
                       <small
