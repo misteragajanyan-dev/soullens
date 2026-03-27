@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -23,6 +23,18 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("");
   const [error, setError] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const updateIsMobile = () => {
+      setIsMobile(window.innerWidth < 900);
+    };
+
+    updateIsMobile();
+    window.addEventListener("resize", updateIsMobile);
+
+    return () => window.removeEventListener("resize", updateIsMobile);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -106,21 +118,29 @@ export default function HomePage() {
         style={{
           maxWidth: 1100,
           margin: "0 auto",
-          padding: "32px 20px 70px",
+          padding: isMobile ? "20px 14px 56px" : "32px 20px 70px",
         }}
       >
         <header
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 30,
+            alignItems: isMobile ? "flex-start" : "center",
+            marginBottom: isMobile ? 22 : 30,
             gap: 12,
             flexWrap: "wrap",
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 700 }}>SoulLens</div>
-          <div style={{ color: "#6b7280", fontSize: 14 }}>
+          <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700 }}>
+            SoulLens
+          </div>
+          <div
+            style={{
+              color: "#6b7280",
+              fontSize: isMobile ? 13 : 14,
+              maxWidth: isMobile ? "100%" : undefined,
+            }}
+          >
             AI-анализ совместимости
           </div>
         </header>
@@ -128,24 +148,26 @@ export default function HomePage() {
         <section
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1.1fr) minmax(320px, 0.9fr)",
-            gap: 28,
+            gridTemplateColumns: isMobile
+              ? "1fr"
+              : "minmax(0, 1.1fr) minmax(320px, 0.9fr)",
+            gap: isMobile ? 18 : 28,
             alignItems: "start",
           }}
         >
-          <div>
+          <div style={{ order: isMobile ? 1 : 1 }}>
             <div
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,
-                padding: "8px 12px",
+                padding: isMobile ? "7px 11px" : "8px 12px",
                 borderRadius: 999,
                 background: "#eef2ff",
                 color: "#4338ca",
                 fontSize: 13,
                 fontWeight: 600,
-                marginBottom: 18,
+                marginBottom: 16,
               }}
             >
               Новый формат совместимости
@@ -153,23 +175,25 @@ export default function HomePage() {
 
             <h1
               style={{
-                fontSize: "clamp(34px, 7vw, 52px)",
-                lineHeight: 1.05,
+                fontSize: isMobile ? "42px" : "clamp(34px, 7vw, 52px)",
+                lineHeight: isMobile ? 1.02 : 1.05,
                 letterSpacing: "-0.03em",
-                margin: "0 0 16px",
+                margin: "0 0 14px",
                 maxWidth: 700,
               }}
             >
-              Узнай, насколько вы совместимы на самом деле
+              Узнай,
+              <br />
+              насколько вы совместимы на самом деле
             </h1>
 
             <p
               style={{
-                fontSize: "clamp(16px, 2vw, 19px)",
+                fontSize: isMobile ? 16 : "clamp(16px, 2vw, 19px)",
                 lineHeight: 1.6,
                 color: "#4b5563",
                 maxWidth: 700,
-                margin: "0 0 28px",
+                margin: "0 0 24px",
               }}
             >
               Не просто шаблонный гороскоп. Получи AI-разбор по дате рождения
@@ -180,9 +204,11 @@ export default function HomePage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: 14,
-                marginBottom: 18,
+                gridTemplateColumns: isMobile
+                  ? "1fr"
+                  : "repeat(auto-fit, minmax(200px, 1fr))",
+                gap: 12,
+                marginBottom: 16,
               }}
             >
               <FeatureCard
@@ -203,10 +229,10 @@ export default function HomePage() {
               style={{
                 background: "#ffffff",
                 border: "1px solid #ececec",
-                borderRadius: 22,
-                padding: 18,
+                borderRadius: isMobile ? 18 : 22,
+                padding: isMobile ? 16 : 18,
                 boxShadow: "0 8px 24px rgba(15, 23, 42, 0.04)",
-                marginBottom: 14,
+                marginBottom: 12,
               }}
             >
               <div
@@ -237,8 +263,8 @@ export default function HomePage() {
               style={{
                 background: "#ffffff",
                 border: "1px solid #ececec",
-                borderRadius: 22,
-                padding: 18,
+                borderRadius: isMobile ? 18 : 22,
+                padding: isMobile ? 16 : 18,
                 boxShadow: "0 8px 24px rgba(15, 23, 42, 0.04)",
               }}
             >
@@ -269,200 +295,208 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div
-            style={{
-              background: "rgba(255,255,255,0.92)",
-              backdropFilter: "blur(14px)",
-              border: "1px solid #e5e7eb",
-              borderRadius: 28,
-              padding: 24,
-              boxShadow: "0 18px 50px rgba(15, 23, 42, 0.08)",
-            }}
-          >
+          <div style={{ order: isMobile ? 2 : 2 }}>
             <div
               style={{
-                display: "flex",
-                gap: 10,
-                marginBottom: 18,
-                flexWrap: "wrap",
+                background: "rgba(255,255,255,0.94)",
+                backdropFilter: "blur(14px)",
+                border: "1px solid #e5e7eb",
+                borderRadius: isMobile ? 22 : 28,
+                padding: isMobile ? 16 : 24,
+                boxShadow: "0 18px 50px rgba(15, 23, 42, 0.08)",
               }}
             >
-              <ModeButton
-                active={mode === "zodiac"}
-                onClick={() => setMode("zodiac")}
-                label="По дате рождения"
-              />
-              <ModeButton
-                active={mode === "screenshots"}
-                onClick={() => setMode("screenshots")}
-                label="По скриншотам"
-              />
-            </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                  gap: 10,
+                  marginBottom: 18,
+                }}
+              >
+                <ModeButton
+                  active={mode === "zodiac"}
+                  onClick={() => setMode("zodiac")}
+                  label="По дате рождения"
+                  fullWidth
+                />
+                <ModeButton
+                  active={mode === "screenshots"}
+                  onClick={() => setMode("screenshots")}
+                  label="По скриншотам"
+                  fullWidth
+                />
+              </div>
 
-            <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
-              {mode === "zodiac" ? (
-                <>
-                  <Field label="Твоё имя">
-                    <input
-                      value={user1Name}
-                      onChange={(e) => setUser1Name(e.target.value)}
-                      placeholder="Например, Иван"
-                      style={inputStyle}
-                    />
-                  </Field>
+              <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
+                {mode === "zodiac" ? (
+                  <>
+                    <Field label="Твоё имя">
+                      <input
+                        value={user1Name}
+                        onChange={(e) => setUser1Name(e.target.value)}
+                        placeholder="Например, Иван"
+                        style={inputStyle}
+                      />
+                    </Field>
 
-                  <Field label="Твоя дата рождения">
-                    <input
-                      type="date"
-                      value={user1Birthdate}
-                      onChange={(e) => setUser1Birthdate(e.target.value)}
-                      style={inputStyle}
-                    />
-                  </Field>
+                    <Field label="Твоя дата рождения">
+                      <input
+                        type="date"
+                        value={user1Birthdate}
+                        onChange={(e) => setUser1Birthdate(e.target.value)}
+                        style={inputStyle}
+                      />
+                    </Field>
 
-                  <Field label="Имя партнёра">
-                    <input
-                      value={user2Name}
-                      onChange={(e) => setUser2Name(e.target.value)}
-                      placeholder="Например, Анна"
-                      style={inputStyle}
-                    />
-                  </Field>
+                    <Field label="Имя партнёра">
+                      <input
+                        value={user2Name}
+                        onChange={(e) => setUser2Name(e.target.value)}
+                        placeholder="Например, Анна"
+                        style={inputStyle}
+                      />
+                    </Field>
 
-                  <Field label="Дата рождения партнёра">
-                    <input
-                      type="date"
-                      value={user2Birthdate}
-                      onChange={(e) => setUser2Birthdate(e.target.value)}
-                      style={inputStyle}
-                    />
-                  </Field>
-                </>
-              ) : (
-                <>
-                  <Field label="Твоё имя">
-                    <input
-                      value={user1Name}
-                      onChange={(e) => setUser1Name(e.target.value)}
-                      placeholder="Необязательно, но желательно"
-                      style={inputStyle}
-                    />
-                  </Field>
+                    <Field label="Дата рождения партнёра">
+                      <input
+                        type="date"
+                        value={user2Birthdate}
+                        onChange={(e) => setUser2Birthdate(e.target.value)}
+                        style={inputStyle}
+                      />
+                    </Field>
+                  </>
+                ) : (
+                  <>
+                    <Field label="Твоё имя">
+                      <input
+                        value={user1Name}
+                        onChange={(e) => setUser1Name(e.target.value)}
+                        placeholder="Необязательно, но желательно"
+                        style={inputStyle}
+                      />
+                    </Field>
 
-                  <Field label="Имя партнёра">
-                    <input
-                      value={user2Name}
-                      onChange={(e) => setUser2Name(e.target.value)}
-                      placeholder="Необязательно, но желательно"
-                      style={inputStyle}
-                    />
-                  </Field>
+                    <Field label="Имя партнёра">
+                      <input
+                        value={user2Name}
+                        onChange={(e) => setUser2Name(e.target.value)}
+                        placeholder="Необязательно, но желательно"
+                        style={inputStyle}
+                      />
+                    </Field>
 
-                  <Field label="Скриншот твоего профиля">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setUser1Image(e.target.files?.[0] || null)}
-                      style={inputStyle}
-                    />
-                    <small
-                      style={{
-                        display: "block",
-                        color: "#6b7280",
-                        marginTop: 8,
-                        fontSize: 12,
-                      }}
-                    >
-                      Подойдёт VK, Telegram, Instagram и другие профили.
-                    </small>
-                  </Field>
+                    <Field label="Скриншот твоего профиля">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setUser1Image(e.target.files?.[0] || null)}
+                        style={inputStyle}
+                      />
+                      <small
+                        style={{
+                          display: "block",
+                          color: "#6b7280",
+                          marginTop: 8,
+                          fontSize: 12,
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        Подойдёт VK, Telegram, Instagram и другие профили.
+                      </small>
+                    </Field>
 
-                  <Field label="Скриншот профиля партнёра">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setUser2Image(e.target.files?.[0] || null)}
-                      style={inputStyle}
-                    />
-                  </Field>
+                    <Field label="Скриншот профиля партнёра">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setUser2Image(e.target.files?.[0] || null)}
+                        style={inputStyle}
+                      />
+                    </Field>
 
-                  <Field label="Контекст отношений">
-                    <textarea
-                      value={relationshipContext}
-                      onChange={(e) => setRelationshipContext(e.target.value)}
-                      placeholder="Например: мы общаемся 3 месяца, часто спорим из-за ревности, хотим понять, есть ли у нас будущее"
-                      rows={5}
-                      style={{
-                        ...inputStyle,
-                        resize: "vertical",
-                        minHeight: 120,
-                      }}
-                    />
-                  </Field>
-                </>
-              )}
+                    <Field label="Контекст отношений">
+                      <textarea
+                        value={relationshipContext}
+                        onChange={(e) => setRelationshipContext(e.target.value)}
+                        placeholder="Например: мы общаемся 3 месяца, часто спорим из-за ревности, хотим понять, есть ли у нас будущее"
+                        rows={5}
+                        style={{
+                          ...inputStyle,
+                          resize: "vertical",
+                          minHeight: 120,
+                        }}
+                      />
+                    </Field>
+                  </>
+                )}
 
-              {error && (
-                <div
-                  style={{
-                    color: "#991b1b",
-                    background: "#fef2f2",
-                    padding: 14,
-                    borderRadius: 14,
-                    border: "1px solid #fecaca",
-                    fontSize: 14,
-                  }}
-                >
-                  {error}
-                </div>
-              )}
+                {error && (
+                  <div
+                    style={{
+                      color: "#991b1b",
+                      background: "#fef2f2",
+                      padding: 14,
+                      borderRadius: 14,
+                      border: "1px solid #fecaca",
+                      fontSize: 14,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {error}
+                  </div>
+                )}
 
-              {loading && (
-                <div
-                  style={{
-                    background: "#eff6ff",
-                    border: "1px solid #bfdbfe",
-                    color: "#1d4ed8",
-                    padding: 14,
-                    borderRadius: 14,
-                    fontSize: 14,
-                  }}
-                >
-                  {loadingText || "Создаём разбор..."}
-                </div>
-              )}
+                {loading && (
+                  <div
+                    style={{
+                      background: "#eff6ff",
+                      border: "1px solid #bfdbfe",
+                      color: "#1d4ed8",
+                      padding: 14,
+                      borderRadius: 14,
+                      fontSize: 14,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {loadingText || "Создаём разбор..."}
+                  </div>
+                )}
 
-              <button type="submit" disabled={loading} style={primaryButton}>
-                {loading
-                  ? "Подожди немного..."
-                  : mode === "zodiac"
-                  ? "Получить разбор"
-                  : "Проанализировать профили"}
-              </button>
-            </form>
+                <button type="submit" disabled={loading} style={primaryButton}>
+                  {loading
+                    ? "Подожди немного..."
+                    : mode === "zodiac"
+                    ? "Получить разбор"
+                    : "Проанализировать профили"}
+                </button>
+              </form>
 
-            <div
-              style={{
-                marginTop: 18,
-                paddingTop: 18,
-                borderTop: "1px solid #ececec",
-                color: "#6b7280",
-                fontSize: 14,
-                display: "grid",
-                gap: 8,
-              }}
-            >
-              <div>✔ Персональный AI-разбор, а не шаблонный текст</div>
-              <div>✔ Можно анализировать цифровой образ по профилям</div>
-              <div>✔ Скриншоты используются только для анализа</div>
+              <div
+                style={{
+                  marginTop: 18,
+                  paddingTop: 18,
+                  borderTop: "1px solid #ececec",
+                  color: "#6b7280",
+                  fontSize: 14,
+                  display: "grid",
+                  gap: 8,
+                  lineHeight: 1.6,
+                }}
+              >
+                <div>✔ Персональный AI-разбор, а не шаблонный текст</div>
+                <div>✔ Можно анализировать цифровой образ по профилям</div>
+                <div>✔ Скриншоты используются только для анализа</div>
+              </div>
             </div>
           </div>
         </section>
 
         <footer
           style={{
-            marginTop: 36,
-            paddingTop: 24,
+            marginTop: 30,
+            paddingTop: 22,
             borderTop: "1px solid #ececec",
             display: "grid",
             gap: 14,
@@ -534,24 +568,27 @@ function ModeButton({
   active,
   onClick,
   label,
+  fullWidth = false,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
+  fullWidth?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       style={{
-        padding: "11px 16px",
-        borderRadius: 14,
+        width: fullWidth ? "100%" : undefined,
+        padding: "13px 16px",
+        borderRadius: 16,
         border: active ? "2px solid #111827" : "1px solid #d1d5db",
         background: active ? "#111827" : "#ffffff",
         color: active ? "#ffffff" : "#111827",
         cursor: "pointer",
-        fontWeight: 600,
-        fontSize: 14,
+        fontWeight: 700,
+        fontSize: 15,
         transition: "all 0.2s ease",
       }}
     >
