@@ -11,17 +11,22 @@ export async function analyzeProfileScreenshot({
   mimeType,
   personLabel,
 }: AnalyzeProfileArgs): Promise<string> {
-  const model = process.env.YANDEX_VISION_MODEL!;
+  const model = process.env.YANDEX_VISION_MODEL?.trim();
 
-  const response = await yandex.chat.completions.create({
-    model,
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: `
+  if (!model) {
+    throw new Error("YANDEX_VISION_MODEL is missing");
+  }
+
+  try {
+    const response = await yandex.chat.completions.create({
+      model,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `
 Опиши профиль ${personLabel} только по тому, что реально видно на скриншоте.
 
 Не фантазируй и не придумывай фактов, которых не видно.
@@ -44,25 +49,42 @@ export async function analyzeProfileScreenshot({
 - если информации на скрине мало, честно скажи, что выводы ограничены
 
 Сделай один цельный связный текст на 2–4 абзаца.
-`,
-          },
-          {
-            type: "image_url",
-            image_url: {
-              url: `data:${mimeType};base64,${imageBase64}`,
+`.trim(),
             },
-          },
-        ],
-      },
-    ],
-    temperature: 0.2,
-  });
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${mimeType};base64,${imageBase64}`,
+              },
+            },
+          ],
+        },
+      ],
+      temperature: 0.2,
+    });
 
-  const text = response.choices?.[0]?.message?.content?.trim() || "";
+    const raw = response.choices?.[0]?.message?.content;
 
-  return text
-    .replace(/\*\*/g, "")
-    .replace(/\\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+    let text = "";
+
+    if (typeof raw === "string") {
+      text = raw;
+    } else if (Array.isArray(raw)) {
+      const parts = raw as Array<{ text?: string }>;
+      text = parts.map((item) => item?.text || "").join("\n");
+    }
+
+    return text
+      .replace(/\*\*/g, "")
+      .replace(/\\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  } catch (error: any) {
+    console.error("YANDEX_VISION_MODEL:", JSON.stringify(model));
+    console.error("analyzeProfileScreenshot error:", error);
+
+    throw new Error(
+      error?.message || "Не удалось проанализировать скриншот профиля"
+    );
+  }
 }
